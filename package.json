@@ -1,7 +1,7 @@
 {
   "name": "@sudowrite/quill-delta-to-html-fork",
-  "version": "1.0.0",
-  "description": "(Special purpose fork of this package) Converts Quill's delta ops to HTML",
+  "version": "1.2.0",
+  "description": "(Special purpose fork of quill-delta-to-html) Converts Quill's delta ops to HTML",
   "main": "./dist/commonjs/main.js",
   "types": "./dist/commonjs/main.d.ts",
   "dependencies": {
@@ -29,23 +29,30 @@
     "build": "./node_modules/typescript/bin/tsc &&  npm run browser ",
     "test": "./node_modules/nyc/bin/nyc.js ./node_modules/mocha/bin/mocha --require ts-node/register -b \"./test/**/*.ts\"  ",
     "coverage": "./node_modules/nyc/bin/nyc.js report --reporter=text-lcov | coveralls ",
-    "coveragehtml": "./node_modules/nyc/bin/nyc.js report --reporter=html "
+    "coveragehtml": "./node_modules/nyc/bin/nyc.js report --reporter=html ",
+    "pub": "npm version patch && npm publish --access public",
+    "pub:dirty": "npm version --no-commit-hooks --no-git-tag-version patch && npm publish --access public"
   },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
+  "private": false,
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/nozer/quill-delta-to-html.git"
+    "url": "git+ssh://git@github.com/sudowrite/quill-delta-to-html-fork.git"
   },
   "keywords": [
     "quill",
     "delta",
     "html"
   ],
-  "author": "Nihat Özer <nihatforweb@gmail.com>",
-  "license": "ISC",
+  "author": "Sudowrite.com (derived from the work of Nihat Özer <nihatforweb@gmail.com>)",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/nozer/quill-delta-to-html/issues"
+    "url": "https://github.com/sudowrite/quill-delta-to-html-fork/issues"
   },
-  "homepage": "https://github.com/nozer/quill-delta-to-html#readme",
+  "homepage": "https://github.com/sudowrite/quill-delta-to-html-fork#readme",
   "nyc": {
     "include": [
       "src/**/*.ts"
