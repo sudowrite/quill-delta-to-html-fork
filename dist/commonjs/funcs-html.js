@@ -40,7 +40,9 @@ function encodeHtml(str, preventDoubleEncoding) {
     if (preventDoubleEncoding) {
         str = decodeHtml(str);
     }
-    return encodeMappings(EncodeTarget.Html).reduce(encodeMapping, str);
+    var __encodedStr = encodeMappings(EncodeTarget.Html).reduce(encodeMapping, str);
+    __encodedStr = __encodedStr.replace(new RegExp('&amp;nbsp;', 'g'), '&nbsp;');
+    return __encodedStr;
 }
 exports.encodeHtml = encodeHtml;
 function encodeLink(str) {

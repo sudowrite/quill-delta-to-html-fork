@@ -62,9 +62,17 @@ var Grouper = (function () {
     };
     Grouper.reduceConsecutiveSameStyleBlocksToOne = function (groups) {
         var newLineOp = DeltaInsertOp_1.DeltaInsertOp.createNewLineOp();
+        var isHeaderWithText = function (e) {
+            return (e instanceof group_types_1.BlockGroup &&
+                e.op instanceof DeltaInsertOp_1.DeltaInsertOp &&
+                e.op.isHeaderWithContent());
+        };
         return groups.map(function (elm) {
             if (!Array.isArray(elm)) {
-                if (elm instanceof group_types_1.BlockGroup && !elm.ops.length) {
+                if (elm instanceof group_types_1.BlockGroup && isHeaderWithText(elm)) {
+                    elm.ops.push(elm.op);
+                }
+                else if (elm instanceof group_types_1.BlockGroup && !elm.ops.length) {
                     elm.ops.push(newLineOp);
                 }
                 return elm;
@@ -72,7 +80,12 @@ var Grouper = (function () {
             var groupsLastInd = elm.length - 1;
             elm[0].ops = array_1.flatten(elm.map(function (g, i) {
                 if (!g.ops.length) {
-                    return [newLineOp];
+                    if (isHeaderWithText(g)) {
+                        return [g.op];
+                    }
+                    else {
+                        return [newLineOp];
+                    }
                 }
                 return g.ops.concat(i < groupsLastInd ? [newLineOp] : []);
             }));
