@@ -22,11 +22,10 @@
     "typescript": "^2"
   },
   "scripts": {
-    "postinstall": "pretty-quick",
-    "prepublishOnly": "npm run build && pretty-quick",
+    "prepublishOnly": "npm run build",
     "browserbundle": "./node_modules/browserify/bin/cmd.js ./dist/commonjs/QuillDeltaToHtmlConverter.js -o ./dist/browser/QuillDeltaToHtmlConverter.bundle.js -s QuillDeltaToHtmlConverter ",
     "browser": "npm run browserbundle && echo '; window.QuillDeltaToHtmlConverter = window.QuillDeltaToHtmlConverter ? window.QuillDeltaToHtmlConverter.QuillDeltaToHtmlConverter : window.QuillDeltaToHtmlConverter; ' >>  ./dist/browser/QuillDeltaToHtmlConverter.bundle.js ",
-    "build": "./node_modules/typescript/bin/tsc &&  npm run browser ",
+    "build": "./node_modules/typescript/bin/tsc && npm run browser && pretty-quick",
     "test": "./node_modules/nyc/bin/nyc.js ./node_modules/mocha/bin/mocha --require ts-node/register -b \"./test/**/*.ts\"  ",
     "coverage": "./node_modules/nyc/bin/nyc.js report --reporter=text-lcov | coveralls ",
     "coveragehtml": "./node_modules/nyc/bin/nyc.js report --reporter=html ",
