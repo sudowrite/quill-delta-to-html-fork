@@ -1,6 +1,6 @@
 {
   "name": "@sudowrite/quill-delta-to-html-fork",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "(Special purpose fork of quill-delta-to-html) Converts Quill's delta ops to HTML",
   "main": "./dist/commonjs/main.js",
   "types": "./dist/commonjs/main.d.ts",
