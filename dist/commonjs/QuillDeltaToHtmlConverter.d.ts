@@ -44,6 +44,9 @@ declare class QuillDeltaToHtmlConverter {
   _renderInlines(ops: DeltaInsertOp[], isInlineGroup?: boolean): string;
   _renderInline(op: DeltaInsertOp, contextOp: DeltaInsertOp | null): any;
   _renderCustom(op: DeltaInsertOp, contextOp: DeltaInsertOp | null): any;
+  beforeBeforeRender(
+    cb: (group: GroupType, data: TDataGroup) => TDataGroup
+  ): void;
   beforeRender(cb: (group: GroupType, data: TDataGroup) => string): void;
   afterRender(cb: (group: GroupType, html: string) => string): void;
   renderCustomWith(

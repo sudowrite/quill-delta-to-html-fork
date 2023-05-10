@@ -131,6 +131,12 @@ var DeltaInsertOp = (function () {
     DeltaInsertOp.prototype.isMentions = function () {
         return this.isText() && !!this.attributes.mentions;
     };
+    DeltaInsertOp.prototype.isHeaderWithContent = function () {
+        return (!!this.attributes &&
+            !!this.attributes.header &&
+            this.insert &&
+            this.insert.type == 'text');
+    };
     return DeltaInsertOp;
 }());
 exports.DeltaInsertOp = DeltaInsertOp;
@@ -534,7 +540,12 @@ var OpToHtmlConverter = (function () {
     };
     OpToHtmlConverter.prototype.getContent = function () {
         if (this.op.isContainerBlock()) {
-            return '';
+            if (this.op.isHeaderWithContent()) {
+                return this.op.insert.value;
+            }
+            else {
+                return '';
+            }
         }
         if (this.op.isMentions()) {
             return this.op.insert.value;
@@ -912,6 +923,10 @@ var QuillDeltaToHtmlConverter = (function () {
     };
     QuillDeltaToHtmlConverter.prototype._renderWithCallbacks = function (groupType, group, myRenderFn) {
         var html = '';
+        var beforeBeforeCb = this.callbacks['beforeBeforeRender_cb'];
+        typeof beforeBeforeCb === 'function'
+            ? beforeBeforeCb.apply(null, [groupType, group])
+            : undefined;
         var beforeCb = this.callbacks['beforeRender_cb'];
         html =
             typeof beforeCb === 'function'
@@ -986,7 +1001,13 @@ var QuillDeltaToHtmlConverter = (function () {
                     .join('')) +
                 htmlParts.closingTag);
         }
-        var inlines = ops.map(function (op) { return _this._renderInline(op, bop); }).join('');
+        var inlines = ops
+            .map(function (op) {
+            return op.isHeaderWithContent() && op.insert.value != ''
+                ? op.insert.value
+                : _this._renderInline(op, bop);
+        })
+            .join('');
         return htmlParts.openingTag + (inlines || BrTag) + htmlParts.closingTag;
     };
     QuillDeltaToHtmlConverter.prototype._renderInlines = function (ops, isInlineGroup) {
@@ -1031,6 +1052,11 @@ var QuillDeltaToHtmlConverter = (function () {
             return renderCb.apply(null, [op, contextOp]);
         }
         return '';
+    };
+    QuillDeltaToHtmlConverter.prototype.beforeBeforeRender = function (cb) {
+        if (typeof cb === 'function') {
+            this.callbacks['beforeBeforeRender_cb'] = cb;
+        }
     };
     QuillDeltaToHtmlConverter.prototype.beforeRender = function (cb) {
         if (typeof cb === 'function') {
@@ -1092,7 +1118,9 @@ function encodeHtml(str, preventDoubleEncoding) {
     if (preventDoubleEncoding) {
         str = decodeHtml(str);
     }
-    return encodeMappings(EncodeTarget.Html).reduce(encodeMapping, str);
+    var __encodedStr = encodeMappings(EncodeTarget.Html).reduce(encodeMapping, str);
+    __encodedStr = __encodedStr.replace(new RegExp('&amp;nbsp;', 'g'), '&nbsp;');
+    return __encodedStr;
 }
 exports.encodeHtml = encodeHtml;
 function encodeLink(str) {
@@ -1197,9 +1225,17 @@ var Grouper = (function () {
     };
     Grouper.reduceConsecutiveSameStyleBlocksToOne = function (groups) {
         var newLineOp = DeltaInsertOp_1.DeltaInsertOp.createNewLineOp();
+        var isHeaderWithText = function (e) {
+            return (e instanceof group_types_1.BlockGroup &&
+                e.op instanceof DeltaInsertOp_1.DeltaInsertOp &&
+                e.op.isHeaderWithContent());
+        };
         return groups.map(function (elm) {
             if (!Array.isArray(elm)) {
-                if (elm instanceof group_types_1.BlockGroup && !elm.ops.length) {
+                if (elm instanceof group_types_1.BlockGroup && isHeaderWithText(elm)) {
+                    elm.ops.push(elm.op);
+                }
+                else if (elm instanceof group_types_1.BlockGroup && !elm.ops.length) {
                     elm.ops.push(newLineOp);
                 }
                 return elm;
@@ -1207,7 +1243,12 @@ var Grouper = (function () {
             var groupsLastInd = elm.length - 1;
             elm[0].ops = array_1.flatten(elm.map(function (g, i) {
                 if (!g.ops.length) {
-                    return [newLineOp];
+                    if (isHeaderWithText(g)) {
+                        return [g.op];
+                    }
+                    else {
+                        return [newLineOp];
+                    }
                 }
                 return g.ops.concat(i < groupsLastInd ? [newLineOp] : []);
             }));

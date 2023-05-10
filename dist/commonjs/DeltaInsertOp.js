@@ -130,6 +130,12 @@ var DeltaInsertOp = (function () {
     DeltaInsertOp.prototype.isMentions = function () {
         return this.isText() && !!this.attributes.mentions;
     };
+    DeltaInsertOp.prototype.isHeaderWithContent = function () {
+        return (!!this.attributes &&
+            !!this.attributes.header &&
+            this.insert &&
+            this.insert.type == 'text');
+    };
     return DeltaInsertOp;
 }());
 exports.DeltaInsertOp = DeltaInsertOp;

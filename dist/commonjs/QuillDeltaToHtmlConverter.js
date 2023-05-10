@@ -131,6 +131,10 @@ var QuillDeltaToHtmlConverter = (function () {
     };
     QuillDeltaToHtmlConverter.prototype._renderWithCallbacks = function (groupType, group, myRenderFn) {
         var html = '';
+        var beforeBeforeCb = this.callbacks['beforeBeforeRender_cb'];
+        typeof beforeBeforeCb === 'function'
+            ? beforeBeforeCb.apply(null, [groupType, group])
+            : undefined;
         var beforeCb = this.callbacks['beforeRender_cb'];
         html =
             typeof beforeCb === 'function'
@@ -205,7 +209,13 @@ var QuillDeltaToHtmlConverter = (function () {
                     .join('')) +
                 htmlParts.closingTag);
         }
-        var inlines = ops.map(function (op) { return _this._renderInline(op, bop); }).join('');
+        var inlines = ops
+            .map(function (op) {
+            return op.isHeaderWithContent() && op.insert.value != ''
+                ? op.insert.value
+                : _this._renderInline(op, bop);
+        })
+            .join('');
         return htmlParts.openingTag + (inlines || BrTag) + htmlParts.closingTag;
     };
     QuillDeltaToHtmlConverter.prototype._renderInlines = function (ops, isInlineGroup) {
@@ -250,6 +260,11 @@ var QuillDeltaToHtmlConverter = (function () {
             return renderCb.apply(null, [op, contextOp]);
         }
         return '';
+    };
+    QuillDeltaToHtmlConverter.prototype.beforeBeforeRender = function (cb) {
+        if (typeof cb === 'function') {
+            this.callbacks['beforeBeforeRender_cb'] = cb;
+        }
     };
     QuillDeltaToHtmlConverter.prototype.beforeRender = function (cb) {
         if (typeof cb === 'function') {

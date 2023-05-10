@@ -93,7 +93,12 @@ var OpToHtmlConverter = (function () {
     };
     OpToHtmlConverter.prototype.getContent = function () {
         if (this.op.isContainerBlock()) {
-            return '';
+            if (this.op.isHeaderWithContent()) {
+                return this.op.insert.value;
+            }
+            else {
+                return '';
+            }
         }
         if (this.op.isMentions()) {
             return this.op.insert.value;
